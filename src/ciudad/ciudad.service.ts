@@ -13,7 +13,7 @@ constructor(
 ){}
 
 async findAll(): Promise<CiudadEntity[]> {
-    return await this.ciudadRepository.find({ relations: ["ciudades"] });
+    return await this.ciudadRepository.find({ relations: ["supermercados"] });
 }
 
 async findOne(id: string): Promise<CiudadEntity> {

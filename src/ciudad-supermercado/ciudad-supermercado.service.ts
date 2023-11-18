@@ -1,88 +1,89 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CiudadEntity } from 'src/ciudad/ciudad.entity';
-import { SupermercadoEntity } from 'src/supermercado/supermercado.entity';
+import { CiudadEntity } from '../ciudad/ciudad.entity';
+import { BusinessError, BusinessLogicException } from '../shared/errors/business-errors';
+import { SupermercadoEntity } from '../supermercado/supermercado.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class CiudadSupermercadoService {
-    constructor(
-        @InjectRepository(CiudadEntity)
-        private readonly ciudadRepository: Repository<CiudadEntity>,
-    
-        @InjectRepository(SupermercadoEntity)
-        private readonly supermercadoRepository: Repository<SupermercadoEntity>
-    ) {}
+  constructor(
+      @InjectRepository(CiudadEntity)
+      private readonly ciudadRepository: Repository<CiudadEntity>,
+  
+      @InjectRepository(SupermercadoEntity)
+      private readonly supermercadoRepository: Repository<SupermercadoEntity>
+  ) {}
 
-    async addArtworkMuseum(museumId: string, artworkId: string): Promise<MuseumEntity> {
-        const artwork: ArtworkEntity = await this.artworkRepository.findOne({where: {id: artworkId}});
-        if (!artwork)
-          throw new BusinessLogicException("The artwork with the given id was not found", BusinessError.NOT_FOUND);
-      
-        const museum: MuseumEntity = await this.museumRepository.findOne({where: {id: museumId}, relations: ["artworks", "exhibitions"]})
-        if (!museum)
-          throw new BusinessLogicException("The museum with the given id was not found", BusinessError.NOT_FOUND);
-    
-        museum.artworks = [...museum.artworks, artwork];
-        return await this.museumRepository.save(museum);
+  async addSupermarketToCity(ciudadId: string, supermercadoId: string): Promise<CiudadEntity> {
+    const supermercado: SupermercadoEntity = await this.supermercadoRepository.findOne({where: {id: supermercadoId}});
+    if (!supermercado)
+      throw new BusinessLogicException("The supermarket with the given id was not found", BusinessError.NOT_FOUND);
+  
+    const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where: {id: ciudadId}, relations: ["supermercados"]})
+    if (!ciudad)
+      throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND);
+
+    ciudad.supermercados = [...ciudad.supermercados, supermercado];
+    return await this.ciudadRepository.save(ciudad);
       }
+
+  async findSupermarketFromCity(ciudadId: string, supermercadoId: string): Promise<SupermercadoEntity> {
+    const supermercado: SupermercadoEntity = await this.supermercadoRepository.findOne({where: {id: supermercadoId}});
+    if (!supermercado)
+      throw new BusinessLogicException("The supermarket with the given id was not found", BusinessError.NOT_FOUND)
     
-    async findArtworkByMuseumIdArtworkId(museumId: string, artworkId: string): Promise<ArtworkEntity> {
-        const artwork: ArtworkEntity = await this.artworkRepository.findOne({where: {id: artworkId}});
-        if (!artwork)
-          throw new BusinessLogicException("The artwork with the given id was not found", BusinessError.NOT_FOUND)
-       
-        const museum: MuseumEntity = await this.museumRepository.findOne({where: {id: museumId}, relations: ["artworks"]});
-        if (!museum)
-          throw new BusinessLogicException("The museum with the given id was not found", BusinessError.NOT_FOUND)
-   
-        const museumArtwork: ArtworkEntity = museum.artworks.find(e => e.id === artwork.id);
-   
-        if (!museumArtwork)
-          throw new BusinessLogicException("The artwork with the given id is not associated to the museum", BusinessError.PRECONDITION_FAILED)
-   
-        return museumArtwork;
+    const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where: {id: ciudadId}, relations: ["supermercados"]});
+    if (!ciudad)
+      throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND)
+
+    const ciudadSupermercado: SupermercadoEntity = ciudad.supermercados.find(e => e.id === supermercado.id);
+
+    if (!ciudadSupermercado)
+      throw new BusinessLogicException("The supermarket with the given id is not associated to the city", BusinessError.PRECONDITION_FAILED)
+
+    return ciudadSupermercado;
+  }
+    
+  async findSupermarketsFromCity(ciudadId: string): Promise<SupermercadoEntity[]> {
+    const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where: {id: ciudadId}, relations: ["supermercados"]});
+    if (!ciudad)
+      throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND)
+    
+    return ciudad.supermercados;
+  }
+  
+  async updateSupermarketsFromCity(ciudadId: string, supermercados: SupermercadoEntity[]): Promise<CiudadEntity> {
+    const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where: {id: ciudadId}, relations: ["supermercados"]});
+
+    if (!ciudad)
+      throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND)
+
+    for (let i = 0; i < supermercados.length; i++) {
+      const supermercado: SupermercadoEntity = await this.supermercadoRepository.findOne({where: {id: supermercados[i].id}});
+      if (!supermercado)
+        throw new BusinessLogicException("The supermarket with the given id was not found", BusinessError.NOT_FOUND)
     }
-    
-    async findArtworksByMuseumId(museumId: string): Promise<ArtworkEntity[]> {
-        const museum: MuseumEntity = await this.museumRepository.findOne({where: {id: museumId}, relations: ["artworks"]});
-        if (!museum)
-          throw new BusinessLogicException("The museum with the given id was not found", BusinessError.NOT_FOUND)
-       
-        return museum.artworks;
-    }
-    
-    async associateArtworksMuseum(museumId: string, artworks: ArtworkEntity[]): Promise<MuseumEntity> {
-        const museum: MuseumEntity = await this.museumRepository.findOne({where: {id: museumId}, relations: ["artworks"]});
-    
-        if (!museum)
-          throw new BusinessLogicException("The museum with the given id was not found", BusinessError.NOT_FOUND)
-    
-        for (let i = 0; i < artworks.length; i++) {
-          const artwork: ArtworkEntity = await this.artworkRepository.findOne({where: {id: artworks[i].id}});
-          if (!artwork)
-            throw new BusinessLogicException("The artwork with the given id was not found", BusinessError.NOT_FOUND)
-        }
-    
-        museum.artworks = artworks;
-        return await this.museumRepository.save(museum);
-      }
-    
-    async deleteArtworkMuseum(museumId: string, artworkId: string){
-        const artwork: ArtworkEntity = await this.artworkRepository.findOne({where: {id: artworkId}});
-        if (!artwork)
-          throw new BusinessLogicException("The artwork with the given id was not found", BusinessError.NOT_FOUND)
-    
-        const museum: MuseumEntity = await this.museumRepository.findOne({where: {id: museumId}, relations: ["artworks"]});
-        if (!museum)
-          throw new BusinessLogicException("The museum with the given id was not found", BusinessError.NOT_FOUND)
-    
-        const museumArtwork: ArtworkEntity = museum.artworks.find(e => e.id === artwork.id);
-    
-        if (!museumArtwork)
-            throw new BusinessLogicException("The artwork with the given id is not associated to the museum", BusinessError.PRECONDITION_FAILED)
- 
-        museum.artworks = museum.artworks.filter(e => e.id !== artworkId);
-        await this.museumRepository.save(museum);
+    ciudad.supermercados = supermercados;
+    return await this.ciudadRepository.save(ciudad);
+  }
+
+  async deleteSupermarketFromCity(ciudadId: string, supermercadoId: string){
+      const supermercado: SupermercadoEntity = await this.supermercadoRepository.findOne({where: {id: supermercadoId}});
+      if (!supermercado)
+        throw new BusinessLogicException("The supermarket with the given id was not found", BusinessError.NOT_FOUND)
+  
+      const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where: {id: ciudadId}, relations: ["supermercados"]});
+      if (!ciudad)
+        throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND)
+  
+      const ciudadSupermercado: SupermercadoEntity = ciudad.supermercados.find(e => e.id === supermercado.id);
+  
+      if (!ciudadSupermercado)
+          throw new BusinessLogicException("The supermarket with the given id is not associated to the city", BusinessError.PRECONDITION_FAILED)
+
+      ciudad.supermercados = ciudad.supermercados.filter(e => e.id !== supermercadoId);
+      await this.ciudadRepository.save(ciudad);
     }  
+    
 }

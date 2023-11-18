@@ -8,11 +8,11 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class CiudadSupermercadoService {
   constructor(
-      @InjectRepository(CiudadEntity)
-      private readonly ciudadRepository: Repository<CiudadEntity>,
-  
-      @InjectRepository(SupermercadoEntity)
-      private readonly supermercadoRepository: Repository<SupermercadoEntity>
+    @InjectRepository(CiudadEntity)
+    private readonly ciudadRepository: Repository<CiudadEntity>,
+
+    @InjectRepository(SupermercadoEntity)
+    private readonly supermercadoRepository: Repository<SupermercadoEntity>
   ) {}
 
   async addSupermarketToCity(ciudadId: string, supermercadoId: string): Promise<CiudadEntity> {

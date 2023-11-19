@@ -25,7 +25,7 @@ async findOne(id: string): Promise<CiudadEntity> {
 }
 
 async create(ciudad: CiudadEntity): Promise<CiudadEntity> {
-    if (ciudad.pais !in ["Argentina", "Ecuador", "Paraguay"]){
+    if (!( ["Argentina", "Ecuador", "Paraguay"].find(x => x === ciudad.pais))){
         throw new BusinessLogicException("The city must belong to Argentina, Ecuador or Paraguay", BusinessError.BAD_REQUEST);
     }
     return await this.ciudadRepository.save(ciudad);
@@ -35,7 +35,7 @@ async update(id: string, ciudad: CiudadEntity): Promise<CiudadEntity> {
     const persistedCiudad: CiudadEntity = await this.ciudadRepository.findOne({where:{id}});
     if (!persistedCiudad){
       throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND);
-    } else if (ciudad.pais !in ["Argentina", "Ecuador", "Paraguay"]){
+    } else if (!( ["Argentina", "Ecuador", "Paraguay"].find(x => x === ciudad.pais))){
         throw new BusinessLogicException("The city must belong to Argentina, Ecuador or Paraguay", BusinessError.BAD_REQUEST);
     }
     return await this.ciudadRepository.save({...persistedCiudad, ...ciudad});
@@ -45,7 +45,7 @@ async delete(id: string) {
     const ciudad: CiudadEntity = await this.ciudadRepository.findOne({where:{id}});
     if (!ciudad){
       throw new BusinessLogicException("The city with the given id was not found", BusinessError.NOT_FOUND);
-    } else if (ciudad.pais !in ["Argentina", "Ecuador", "Paraguay"]){
+    } else if (!( ["Argentina", "Ecuador", "Paraguay"].find(x => x === ciudad.pais))){
         throw new BusinessLogicException("The city must belong to Argentina, Ecuador or Paraguay", BusinessError.BAD_REQUEST);
     }
     await this.ciudadRepository.remove(ciudad);

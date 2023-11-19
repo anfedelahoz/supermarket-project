@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseInterceptors } from '@nestjs/common';
 import { CiudadSupermercadoService } from './ciudad-supermercado.service';
-import { BusinessErrorsInterceptor } from 'src/shared/interceptors/business-errors/business-errors.interceptor';
-import { SupermercadoDto } from 'src/supermercado/supermercado.dto';
+import { BusinessErrorsInterceptor } from '../shared/interceptors/business-errors.interceptor';
+import { SupermercadoDto } from '../supermercado/supermercado.dto';
 import { plainToInstance } from 'class-transformer';
-import { SupermercadoEntity } from 'src/supermercado/supermercado.entity';
+import { SupermercadoEntity } from '../supermercado/supermercado.entity';
 
 @Controller('cities')
 @UseInterceptors(BusinessErrorsInterceptor)

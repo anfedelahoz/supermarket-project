@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UseInterceptors } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CiudadEntity } from '../ciudad/ciudad.entity';
 import { BusinessError, BusinessLogicException } from '../shared/errors/business-errors';
 import { SupermercadoEntity } from '../supermercado/supermercado.entity';
 import { Repository } from 'typeorm';
+import { BusinessErrorsInterceptor } from '../shared/interceptors/business-errors.interceptor';
 
+@UseInterceptors(BusinessErrorsInterceptor)
 @Injectable()
 export class CiudadSupermercadoService {
   constructor(

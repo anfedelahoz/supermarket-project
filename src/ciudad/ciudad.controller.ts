@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseInterceptors } from '@nestjs/common';
 import { CiudadService } from './ciudad.service';
 import { plainToInstance } from 'class-transformer';
 import { CiudadDto } from './ciudad.dto';
 import { CiudadEntity } from './ciudad.entity';
+import { BusinessErrorsInterceptor } from '../shared/interceptors/business-errors.interceptor';
 
+@UseInterceptors(BusinessErrorsInterceptor)
 @Controller('cities')
 export class CiudadController {
     constructor(private readonly ciudadService: CiudadService) {}

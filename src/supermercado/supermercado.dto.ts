@@ -15,5 +15,5 @@ export class SupermercadoDto {
 
     @IsUrl()
     @IsNotEmpty()
-    readonly pagina_web: number;
+    readonly pagina_web: string;
 }
